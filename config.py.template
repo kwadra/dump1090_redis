@@ -1,0 +1,8 @@
+# Copy to config.pi
+redis_port=30036
+redis_host="__hostname__"
+redis_username=None
+redis_password="__redis_password__"
+
+fa_host="__dump1090host__"
+fa_port=30003
