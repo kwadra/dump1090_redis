@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 import sys, os.path
 from config import *
-#sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 import redis
 import logging
 import py1090 
 import datetime
-logging.basicConfig(level=logging.INFO)
+FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
 logging.info("Connecting to %s:%d", redis_host,redis_port)
-r = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, socket_timeout=2.0)
+r = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, 
+socket_timeout=2.0)
 
 def _dump_bool(value):
     if value == True:
