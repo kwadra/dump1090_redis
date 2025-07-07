@@ -1,0 +1,35 @@
+version = 1
+requires-python = ">=3.13"
+
+[[package]]
+name = "dump1090-redis"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "py1090" },
+    { name = "redis" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "py1090", specifier = ">=1.1" },
+    { name = "redis", specifier = ">=6.2.0" },
+]
+
+[[package]]
+name = "py1090"
+version = "1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b4/5d/a81e91065ceeb334c7bfade15db510403b4a5441e6ef30cee5a8726ddc15/py1090-1.1.tar.gz", hash = "sha256:0c88cb2ba4541bf9ea8d1bdf228a96c9eff19fc48ca8a37df744d15644267a88", size = 9041 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b6/e7/a305af18e0f639459026144706bb30be5836eb04141503fc1b3153146143/py1090-1.1-py3-none-any.whl", hash = "sha256:f723124c06e836cf58e27a909de46d69fad83f929a9f0fe69d31d576298e01bc", size = 9829 },
+]
+
+[[package]]
+name = "redis"
+version = "6.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/9a/0551e01ba52b944f97480721656578c8a7c46b51b99d66814f85fe3a4f3e/redis-6.2.0.tar.gz", hash = "sha256:e821f129b75dde6cb99dd35e5c76e8c49512a5a0d8dfdc560b2fbd44b85ca977", size = 4639129 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/67/e60968d3b0e077495a8fee89cf3f2373db98e528288a48f1ee44967f6e8c/redis-6.2.0-py3-none-any.whl", hash = "sha256:c8ddf316ee0aab65f04a11229e94a64b2618451dab7a67cb2f77eb799d872d5e", size = 278659 },
+]
