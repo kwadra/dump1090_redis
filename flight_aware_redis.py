@@ -14,6 +14,8 @@ logging.info("Connecting to %s:%d", redis_host,redis_port)
 r = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, 
 socket_timeout=2.0)
 
+CALL_SIGNS = {}
+
 def _dump_bool(value):
     if value == True:
         return 1
@@ -32,21 +34,26 @@ def to_record(message):
         return_dict[k] = v
     return return_dict
 
-def publish_rec(message):
-    logging.info("queue message %s on %s", message, mqtt_topic_name)
-    publish.single(mqtt_topic_name, str(message), hostname=mqtt_host)
+def publish_rec(message, last_message):
+    if message != last_message:
+        logging.info("queue message %s on %s", message, mqtt_topic_name)
+        publish.single(mqtt_topic_name, str(message)[:8], hostname=mqtt_host)
 
 def record_positions_to_redis(redis_client):
+    last_message = None
     with py1090.Connection(host=fa_host) as connection:
         for line in connection:
             message = py1090.Message.from_string(line)
+            if message.callsign:
+                CALL_SIGNS[message.hexident] = message.callsign
             if message.latitude and message.longitude:
                 distance = distance_between(home_lat, home_long, message.latitude, message.longitude) * 0.000621371
                 message.distance = distance
-                if distance <= mqtt_distance_max:
-                    # and message.callsign:
-                    logging.info("Updating %s %s ", message.hexident, message.callsign)
-                    publish_rec( message.callsign)
+                if distance <= mqtt_distance_max and message.hexident in CALL_SIGNS:
+                    call_sign = CALL_SIGNS[message.hexident]
+                    logging.info("Updating %s %s ", message.hexident,call_sign) 
+                    publish_rec( call_sign, last_message) 
+                    last_message = call_sign
             redis_client.hset(message.hexident, mapping=to_record(message))
 
 if __name__ == "__main__":
