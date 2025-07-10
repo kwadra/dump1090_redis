@@ -6,14 +6,36 @@ name = "dump1090-redis"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "paho-mqtt" },
     { name = "py1090" },
+    { name = "python-daemon" },
     { name = "redis" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "paho-mqtt" },
     { name = "py1090", specifier = ">=1.1" },
+    { name = "python-daemon" },
     { name = "redis", specifier = ">=6.2.0" },
+]
+
+[[package]]
+name = "lockfile"
+version = "0.12.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/17/47/72cb04a58a35ec495f96984dddb48232b551aafb95bde614605b754fe6f7/lockfile-0.12.2.tar.gz", hash = "sha256:6aed02de03cba24efabcd600b30540140634fc06cfa603822d508d5361e9f799", size = 20874 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/22/9460e311f340cb62d26a38c419b1381b8593b0bb6b5d1f056938b086d362/lockfile-0.12.2-py2.py3-none-any.whl", hash = "sha256:6c3cb24f344923d30b2785d5ad75182c8ea7ac1b6171b08657258ec7429d50fa", size = 13564 },
+]
+
+[[package]]
+name = "paho-mqtt"
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/15/0a6214e76d4d32e7f663b109cf71fb22561c2be0f701d67f93950cd40542/paho_mqtt-2.1.0.tar.gz", hash = "sha256:12d6e7511d4137555a3f6ea167ae846af2c7357b10bc6fa4f7c3968fc1723834", size = 148848 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/cb/00451c3cf31790287768bb12c6bec834f5d292eaf3022afc88e14b8afc94/paho_mqtt-2.1.0-py3-none-any.whl", hash = "sha256:6db9ba9b34ed5bc6b6e3812718c7e06e2fd7444540df2455d2c51bd58808feee", size = 67219 },
 ]
 
 [[package]]
@@ -23,6 +45,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b4/5d/a81e91065ceeb334c7bfade15db510403b4a5441e6ef30cee5a8726ddc15/py1090-1.1.tar.gz", hash = "sha256:0c88cb2ba4541bf9ea8d1bdf228a96c9eff19fc48ca8a37df744d15644267a88", size = 9041 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b6/e7/a305af18e0f639459026144706bb30be5836eb04141503fc1b3153146143/py1090-1.1-py3-none-any.whl", hash = "sha256:f723124c06e836cf58e27a909de46d69fad83f929a9f0fe69d31d576298e01bc", size = 9829 },
+]
+
+[[package]]
+name = "python-daemon"
+version = "3.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lockfile" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3d/37/4f10e37bdabc058a32989da2daf29e57dc59dbc5395497f3d36d5f5e2694/python_daemon-3.1.2.tar.gz", hash = "sha256:f7b04335adc473de877f5117e26d5f1142f4c9f7cd765408f0877757be5afbf4", size = 71576 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/3c/b88167e2d6785c0e781ee5d498b07472aeb9b6765da3b19e7cc9e0813841/python_daemon-3.1.2-py3-none-any.whl", hash = "sha256:b906833cef63502994ad48e2eab213259ed9bb18d54fa8774dcba2ff7864cec6", size = 30872 },
 ]
 
 [[package]]
