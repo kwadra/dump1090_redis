@@ -8,5 +8,6 @@ dependencies = [
     "py1090>=1.1",
     "redis>=6.2.0",
     "paho-mqtt",
-    "python-daemon"
+    "python-daemon",
+    "python-dotenv"
 ]

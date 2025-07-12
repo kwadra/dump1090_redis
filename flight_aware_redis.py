@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys, os.path
-from config import *
 import redis
 import logging
 import py1090 
@@ -9,20 +8,21 @@ import paho.mqtt.publish as publish
 from py1090.helpers import distance_between
 from py1090 import FlightCollection
 import daemon
+from config import CONFIG, redact_url_password
 
 # configure a file logger
-if not os.path.exists(LOG_DIR):
-    os.makedirs(LOG_DIR)
-log_file = os.path.join(LOG_DIR, 'flight_aware_redis.log')
+if not os.path.exists(CONFIG.log_dir):
+    os.makedirs(CONFIG["LOG_DIR"])
+log_file = os.path.join(CONFIG["LOG_DIR"], 'flight_aware_redis.log')
 
 FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT, filename=log_file)
-logging.info("Connecting to %s:%d", redis_host,redis_port)
-r = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, 
-socket_timeout=2.0)
+logging.info("Connecting to %s", redact_url_password(CONFIG.redis_url))
+r = redis.Redis.from_url(CONFIG["REDIS_URL"], decode_responses=True,socket_timeout=2.0)
 
 CALL_SIGNS = {}
 FLIGHTS = FlightCollection()
+MILES_PER_METER = 0.000621371
 
 
 def _dump_bool(value):
@@ -45,8 +45,8 @@ def to_record(message):
 
 def publish_rec(message, last_message):
     if message != last_message:
-        logging.info("queue message %s on %s", message.strip(), mqtt_topic_name)
-        publish.single(mqtt_topic_name, str(message).strip(), hostname=mqtt_host)
+        logging.info("queue message %s on %s", message.strip(), CONFIG.mqtt_topic_name)
+        publish.single(CONFIG.mqtt_topic_name, str(message).strip(), hostname=CONFIG.mqtt_host)
         return message
     return last_message
 
@@ -73,14 +73,18 @@ def record_positions_to_redis(redis_client):
     last_message = None
     msg_count = 0
     distance = 0
-    with py1090.Connection(host=fa_host) as connection:
+    with py1090.Connection(host=CONFIG.fa_host) as connection:
         for line in connection:
             message = py1090.Message.from_string(line)
 
             if message.latitude and message.longitude:
-                distance = distance_between(home_lat, home_long, message.latitude, message.longitude) * 0.000621371
+                distance = distance_between(CONFIG.home_latitude,
+                                            CONFIG.home_longitude,
+                                            message.latitude,
+                                            message.longitude) * MILES_PER_METER
+
                 message.distance = distance
-                if distance <= mqtt_distance_max and message.hexident in FLIGHTS:
+                if distance <= CONFIG.mqtt_distance_max and message.hexident in FLIGHTS:
                     call_sign, dist = get_call_sign(message.hexident)
                     logging.info("Updating %s call_sign='%s'", message.hexident,call_sign) 
                     last_message = publish_rec( call_sign, last_message)

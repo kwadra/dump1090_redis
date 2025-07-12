@@ -1,8 +1,9 @@
 Connect to dump1090 basestation port and persist messages to a REDIS data store
 
-# Install
+# Install project with uv
 ```bash
-pip3 install -r requirements.txt
+uv venv
+uv sync
 cp config.py.template config.py
 ```
 Edit config.py - set REDIS login username/host/port/password
