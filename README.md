@@ -6,5 +6,5 @@ uv venv
 uv sync
 cp dotenv-sample .env
 ```
-Edit config.py - set REDIS login username/host/port/password
+Edit .env - set REDIS login username/host/port/password
 Update the hostname and port of the dump1090/Flight Aware host
