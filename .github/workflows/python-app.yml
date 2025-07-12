@@ -28,6 +28,9 @@ jobs:
       with:
         version: "latest"
 
+    - name: Install the project
+      run: uv sync --locked --all-extras --dev
+
     - name: Test with pytest
       run: |
         uv tool run pytest --cov=uv --cov-report=xml --cov-report=term-missing
