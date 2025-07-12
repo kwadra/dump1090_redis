@@ -11,3 +11,11 @@ dependencies = [
     "python-daemon",
     "python-dotenv"
 ]
+
+# Optional dependencies development
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
