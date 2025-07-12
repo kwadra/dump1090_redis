@@ -55,12 +55,15 @@ def cleanup_flight_collection(max_age=3600):
     while True:
         time.sleep(max_age / 2)
         logger.info("Starting cleanup of flight collection. size=%d", len(FLIGHTS))
-        now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        time_now = datetime.datetime.now(datetime.timezone.utc)
+        time_now = time_now.replace(tzinfo=None)
         remove_list = []
         for flight in FLIGHTS:
-            last_message = flight.messages[-1] if flight.messages else None
-
-            if  last_message and  (now - last_message.generation_time).total_seconds() > max_age:
+            if not flight.messages:
+                continue
+            last_message = flight.messages[-1]
+            age =  (time_now - last_message.generation_time).total_seconds()
+            if age > max_age:
                 logger.info("Removing flight %s from collection", flight.hexident)
                 remove_list.append(flight.hexident)
         # remove from dictionary
@@ -69,7 +72,6 @@ def cleanup_flight_collection(max_age=3600):
                 del FLIGHTS._dictionary[id]
             except KeyError:
                 logger.warning("Flight %s not found in FLIGHTS collection", id)
-
 
 def get_call_sign(hexident):
     flight_rec = FLIGHTS[hexident]
