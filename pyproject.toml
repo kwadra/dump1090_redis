@@ -8,5 +8,14 @@ dependencies = [
     "py1090>=1.1",
     "redis>=6.2.0",
     "paho-mqtt",
-    "python-daemon"
+    "python-daemon",
+    "python-dotenv"
+]
+
+# Optional dependencies development
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
 ]

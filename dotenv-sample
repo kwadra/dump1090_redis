@@ -1,0 +1,17 @@
+
+REDIS_URL="redis://default:pass@redis-host.org:30036/0"
+
+FA_HOST="piaware.host.org"
+FA_PORT=30003
+
+HOME_LATITUDE="30.001"
+HOME_LONGITUDE="-100.12345"
+
+MQTT_SPLITFLAP_HOST="splitflap"
+MQTT_TOPIC_NAME="splitflap/splitflap/set"
+MQTT_HOST="host.local"
+# miles from home_lat/long 
+MQTT_DISTANCE_MAX="1.0"
+
+LOG_DIR="/tmp/adsb"
+RUNNING_IN_VSCODE="true"
