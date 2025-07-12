@@ -4,7 +4,7 @@ Connect to dump1090 basestation port and persist messages to a REDIS data store
 ```bash
 uv venv
 uv sync
-cp config.py.template config.py
+cp dotenv-sample .env
 ```
 Edit config.py - set REDIS login username/host/port/password
 Update the hostname and port of the dump1090/Flight Aware host
