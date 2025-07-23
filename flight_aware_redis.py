@@ -16,10 +16,7 @@ from config import CONFIG, redact_url_password
 # configure a file logger
 
 FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT, filename=CONFIG.log_filename)
 logger = logging.getLogger(__name__)
-logging.info("Connecting to %s", redact_url_password(CONFIG.redis_url))
-r = redis.Redis.from_url(CONFIG["REDIS_URL"], decode_responses=True,socket_timeout=2.0)
 
 FLIGHTS = FlightCollection()
 MILES_PER_METER = 0.000621371
@@ -66,6 +63,9 @@ def cleanup_flight_collection(max_age=3600):
             if age > max_age:
                 logger.info("Removing flight %s from collection", flight.hexident)
                 remove_list.append(flight.hexident)
+            # trim messages to the newest 50
+            if len(flight.messages) > 50:
+                flight.messages = flight.messages[-50:]
         # remove from dictionary
         for id in remove_list:
             try:
@@ -120,11 +120,16 @@ def record_positions_to_redis(redis_client):
                 logging.info("%d %s recorded. last_dist=%0.2f call_sign=%s", msg_count, message.hexident, distance, call_sign)
 
 def run_loop():
+    # setup logging after daemon context is created
+    logging.basicConfig(level=logging.INFO, format=FORMAT, filename=CONFIG.log_filename)
     logging.info("Starting to record positions to Redis")
     # create a background thread to execute cleanup_flight_collection
 
     cleanup_thread = threading.Thread(target=cleanup_flight_collection, daemon=True)
     cleanup_thread.start()
+
+    logging.info("Connecting to Redis at %s", redact_url_password(CONFIG.redis_url))
+    r = redis.Redis.from_url(CONFIG["REDIS_URL"], decode_responses=True,socket_timeout=2.0)
 
     while True:
         try:
@@ -141,5 +146,4 @@ if __name__ == "__main__":
         sys.exit(0)
         
     with daemon.DaemonContext():
-        pass
         run_loop()
