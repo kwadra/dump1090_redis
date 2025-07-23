@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import gc
 import sys, os.path
 import threading
 import time
@@ -72,6 +73,8 @@ def cleanup_flight_collection(max_age=3600):
                 del FLIGHTS._dictionary[id]
             except KeyError:
                 logger.warning("Flight %s not found in FLIGHTS collection", id)
+        gc.collect()
+
 
 def get_call_sign(hexident):
     flight_rec = FLIGHTS[hexident]
@@ -99,6 +102,8 @@ def record_positions_to_redis(redis_client):
     with py1090.Connection(host=CONFIG.fa_host) as connection:
         for line in connection:
             message = py1090.Message.from_string(line)
+            if message.on_ground:
+                continue
 
             if message.latitude and message.longitude:
                 distance = distance_between(CONFIG.home_latitude,
@@ -112,11 +117,11 @@ def record_positions_to_redis(redis_client):
                     logger.info("Updating %s call_sign='%s'", message.hexident,call_sign)
                     last_message = publish_rec( call_sign, last_message)
             FLIGHTS.add(message)
-            
-            call_sign, distance = get_call_sign(message.hexident)
+            # publish to redis
             redis_client.hset(message.hexident, mapping=to_record(message))
             msg_count += 1
             if msg_count % 1000 == 0:
+                call_sign, distance = get_call_sign(message.hexident)
                 logging.info("%d %s recorded. last_dist=%0.2f call_sign=%s", msg_count, message.hexident, distance, call_sign)
 
 def run_loop():
