@@ -17,7 +17,7 @@ from config import CONFIG, redact_url_password
 # configure a file logger
 
 FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
-logger = logging.getLogger(__name__)
+logger = None
 
 FLIGHTS = FlightCollection()
 MILES_PER_METER = 0.000621371
@@ -48,10 +48,10 @@ def publish_rec(message, last_message):
         return message
     return last_message
 
-def cleanup_flight_collection(max_age=3600):
+def cleanup_flight_collection(max_age=3600, sleep_time=600):
     """Remove flights that have not been updated in the last n minutes."""
     while True:
-        time.sleep(max_age / 2)
+        time.sleep(sleep_time)
         logger.info("Starting cleanup of flight collection. size=%d", len(FLIGHTS))
         time_now = datetime.datetime.now(datetime.timezone.utc)
         time_now = time_now.replace(tzinfo=None)
@@ -125,9 +125,14 @@ def record_positions_to_redis(redis_client):
                 logging.info("%d %s recorded. last_dist=%0.2f call_sign=%s", msg_count, message.hexident, distance, call_sign)
 
 def run_loop():
+    global logger
+    # reset any existing logger
+    logging.getLogger().handlers = []
     # setup logging after daemon context is created
     logging.basicConfig(level=logging.INFO, format=FORMAT, filename=CONFIG.log_filename)
-    logging.info("Starting to record positions to Redis")
+    logger = logging.getLogger(__name__)
+
+    logger.info("Starting to record positions to Redis")
     # create a background thread to execute cleanup_flight_collection
 
     cleanup_thread = threading.Thread(target=cleanup_flight_collection, daemon=True)
