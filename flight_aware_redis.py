@@ -101,26 +101,39 @@ def record_positions_to_redis(redis_client):
     distance = 0
     with py1090.Connection(host=CONFIG.fa_host) as connection:
         for line in connection:
+            update = False
             message = py1090.Message.from_string(line)
             if message.on_ground:
                 continue
+            # continue if there's none of  latitude, longitude or callsign
+            if not (message.latitude or message.longitude or message.callsign):
+                continue
+
+            if message.callsign:
+                FLIGHTS.add(message)
+                continue
 
             if message.latitude and message.longitude:
+                update = True
                 distance = distance_between(CONFIG.home_latitude,
                                             CONFIG.home_longitude,
                                             message.latitude,
                                             message.longitude) * MILES_PER_METER
 
                 message.distance = distance
-                if distance <= CONFIG.mqtt_distance_max and message.hexident in FLIGHTS:
-                    call_sign, dist = get_call_sign(message.hexident)
-                    logger.info("Updating %s call_sign='%s'", message.hexident,call_sign)
-                    last_message = publish_rec( call_sign, last_message)
-            FLIGHTS.add(message)
-            # publish to redis
-            redis_client.hset(message.hexident, mapping=to_record(message))
+                if distance <= CONFIG.mqtt_distance_max and message.hexident in FLIGHTS._dictionary:
+                        call_sign, dist = get_call_sign(message.hexident)
+                        logger.info("Updating %s call_sign='%s'", message.hexident,call_sign)
+                        last_message = publish_rec( call_sign, last_message)
+                        message.notified = True
+                        update = True
+                FLIGHTS.add(message)
+
+            if update:
+                # publish to redis
+                redis_client.hset(message.hexident, mapping=to_record(message))
             msg_count += 1
-            if msg_count % 1000 == 0:
+            if msg_count % 10000 == 0:
                 call_sign, distance = get_call_sign(message.hexident)
                 logging.info("%d %s recorded. last_dist=%0.2f call_sign=%s", msg_count, message.hexident, distance, call_sign)
 
