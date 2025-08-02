@@ -154,9 +154,11 @@ def liveness_message():
     Publish a liveness message to MQTT twice a day at 9 AM and 9 PM
     :return:
     """
+    # don't publish during the night
+    exclusion_hours = [21, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8]
     while True:
         now = datetime.datetime.now()
-        if now.hour == 8 or now.hour == 20:
+        if now.hour not in exclusion_hours and now.minute == 0:  # every hour at the top of the hour
             publish.single(CONFIG.mqtt_topic_name, "{} Flts".format(len(FLIGHTS)), hostname=CONFIG.mqtt_host)
             logger.info("Published liveness message")
             time.sleep(3600)  # wait for an hour before checking again
