@@ -55,32 +55,36 @@ def record_and_cleanup(max_age=3600, sleep_time=60):
     logger.info("Connecting to Redis at %s", redact_url_password(CONFIG.redis_url))
     redis_client = redis.Redis.from_url(CONFIG["REDIS_URL"], decode_responses=True,socket_timeout=2.0)
     while True:
-        time.sleep(sleep_time)
-        logger.info("Starting cleanup of flight collection. size=%d", len(FLIGHTS))
-        time_now = datetime.datetime.now(datetime.timezone.utc)
-        time_now = time_now.replace(tzinfo=None)
-        remove_list = []
-        for flight in FLIGHTS.flights():
+        try:
+            time.sleep(sleep_time)
+            logger.info("Starting cleanup of flight collection. size=%d", len(FLIGHTS))
+            time_now = datetime.datetime.now(datetime.timezone.utc)
+            time_now = time_now.replace(tzinfo=None)
+            remove_list = []
+            for flight in FLIGHTS.flights():
 
-            if not flight.messages:
-                continue
-            last_message = flight.messages[-1]
-            redis_client.hset(last_message.hexident, mapping=to_record(last_message))
-            flight.last_persist = time.time()
-            age =  (time_now - last_message.generation_time).total_seconds()
-            if age > max_age:
-                logger.info("Removing flight %s from collection", flight.hexident)
-                remove_list.append(flight.hexident)
-            # trim messages to the newest 50
-            if len(flight.messages) > 50:
-                flight.messages = flight.messages[-50:]
-        # remove from dictionary
-        for id in remove_list:
-            try:
-                del FLIGHTS[id]
-            except KeyError:
-                logger.warning("Flight %s not found in FLIGHTS collection", id)
-        gc.collect()
+                if not flight.messages:
+                    continue
+                last_message = flight.messages[-1]
+                redis_client.hset(last_message.hexident, mapping=to_record(last_message))
+                flight.last_persist = time.time()
+                age =  (time_now - last_message.generation_time).total_seconds()
+                if age > max_age:
+                    logger.info("Removing flight %s from collection", flight.hexident)
+                    remove_list.append(flight.hexident)
+                # trim messages to the newest 50
+                if len(flight.messages) > 50:
+                    flight.messages = flight.messages[-50:]
+            # remove from dictionary
+            for id in remove_list:
+                try:
+                    del FLIGHTS[id]
+                except KeyError:
+                    logger.warning("Flight %s not found in FLIGHTS collection", id)
+            gc.collect()
+        except Exception:
+            logger.exception("Error during cleanup of flight collection")
+            time.sleep(sleep_time)
 
 
 def get_call_sign(hexident):
